@@ -25,7 +25,7 @@ export const UserInfo = () => {
   const renderContent = () => {
     if (!user?.address || user?.address !== privyAddress) {
       return (
-        <div className="flex items-center gap-1 flex-col">
+        <div className="flex items-center gap-4">
           <div className="bg-black text-white px-4 py-2 rounded-full">
             Not Connected
           </div>
@@ -41,7 +41,7 @@ export const UserInfo = () => {
       )
     }
     return (
-      <div className="flex items-center gap-1 flex-col">
+      <div className="flex items-center gap-4">
         <div className="bg-black text-white px-4 py-2 rounded-full">
           {formatAddress(user?.address)}
         </div>
@@ -52,5 +52,9 @@ export const UserInfo = () => {
     )
   }
 
-  return <div className="absolute top-4 right-4">{renderContent()}</div>
+  return (
+    <>
+      {renderContent()}
+    </>
+  )
 }

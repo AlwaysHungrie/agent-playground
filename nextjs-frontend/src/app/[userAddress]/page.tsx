@@ -3,11 +3,15 @@
 import { usePrivy } from '@privy-io/react-auth'
 import { usePathname } from 'next/navigation'
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { Loader2 } from 'lucide-react'
+import { Loader2, LucideHome } from 'lucide-react'
 import CTAButton from '@/components/cta'
 import { Card, CardContent } from '@/components/ui/card'
 import { UserContext } from '@/providers/userProvider'
 import AgentInfo from '@/components/agent/agentInfo'
+import ChatInterface from '@/components/chat/chatInterface'
+import { UserInfo } from '@/components/userInfo'
+import Link from 'next/link'
+import { HiHome } from 'react-icons/hi'
 
 export default function UserPage() {
   const pathname = usePathname()
@@ -35,12 +39,10 @@ export default function UserPage() {
       )
       const data = await response.json()
       console.log('get agent data', data)
-      const {
-        success,
-        user: { agentAddress, agentSystemPrompt },
-      } = data
+      const { success, user: { agentAddress, agentSystemPrompt } = {} } = data
 
       if (!success) {
+        console.log('agent not found')
         setAgentNotFound(true)
         return
       }
@@ -119,7 +121,7 @@ export default function UserPage() {
     )
   }
 
-  if (agentNotFound) {
+  if (agentNotFound || (newAgent && !isOwner)) {
     return (
       <div className="flex justify-center items-center h-screen p-4">
         <Card className="max-w-sm w-full">
@@ -127,7 +129,7 @@ export default function UserPage() {
             <div className="text-center flex flex-col gap-4">
               <p>Unable to find an agent for this account.</p>
               <p className="text-gray-600">
-                Visit the home page if you are the owner of this address.
+                If you are the owner of this address, visit the home page and connect your wallet.
               </p>
               <CTAButton asLink="/" className="mt-2" onClick={() => {}}>
                 Back to Home
@@ -160,8 +162,14 @@ export default function UserPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <div className="max-w-sm mx-auto h-screen overflow-y-auto">
+    <div className="h-screen bg-gray-50 flex">
+      <div className="max-w-sm mx-auto h-full overflow-y-auto bg-white">
+        <div className="w-full flex items-center gap-4 px-4 py-4 border-b border-gray-200 bg-gray-100">
+          <Link href="/" className="mr-auto bg-gray-200 rounded-full p-2 hover:bg-gray-300">
+            <HiHome className="w-6 h-6" />
+          </Link>
+          <UserInfo />
+        </div>
         <AgentInfo
           addressInPath={addressInPath}
           agentAddress={agentAddress}
@@ -174,9 +182,8 @@ export default function UserPage() {
           handleSave={handleSave}
         />
       </div>
-      <div className="flex-1 flex flex-col gap-4 bg-red-500">
-        <div className="flex-1"></div>
-        <div className="flex-1"></div>
+      <div className="flex-1 flex flex-col gap-4 h-full">
+        <ChatInterface />
       </div>
     </div>
   )

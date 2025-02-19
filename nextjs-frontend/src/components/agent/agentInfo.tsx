@@ -33,12 +33,13 @@ export default function AgentInfo({
   return (
     <Card
       className={cn(
-        newAgent && 'bg-white shadow-none rounded-none',
-        'border-none'
+        newAgent ? 'bg-white' : 'bg-transparent border-none shadow-none rounded-none',
       )}
     >
       <CardHeader>
-        <CardTitle className="text-center">
+        <CardTitle
+          className={`text-2xl ${newAgent ? 'text-center' : 'text-left'}`}
+        >
           {formatAddress(addressInPath ?? '')}&apos;s Agent
         </CardTitle>
       </CardHeader>

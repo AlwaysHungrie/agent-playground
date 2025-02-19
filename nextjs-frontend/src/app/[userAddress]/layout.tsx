@@ -1,4 +1,3 @@
-import { UserInfo } from "@/components/userInfo"
 export default function UserLayout({
   children,
 }: {
@@ -6,7 +5,6 @@ export default function UserLayout({
 }) {
   return (
     <div className="flex flex-col gap-4 relative">
-      <UserInfo />
       {children}
     </div>
   )
