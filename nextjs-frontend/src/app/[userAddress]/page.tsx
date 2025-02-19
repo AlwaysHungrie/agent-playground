@@ -3,7 +3,7 @@
 import { usePrivy } from '@privy-io/react-auth'
 import { usePathname } from 'next/navigation'
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { Loader2, LucideHome } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import CTAButton from '@/components/cta'
 import { Card, CardContent } from '@/components/ui/card'
 import { UserContext } from '@/providers/userProvider'
