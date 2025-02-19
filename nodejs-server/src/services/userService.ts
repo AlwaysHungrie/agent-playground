@@ -1,8 +1,9 @@
 import prisma from '../prisma'
 
-export const createUser = async (address: string) => {
+export const createUser = async (privyUserId: string, address: string) => {
   const user = await prisma.user.create({
     data: {
+      id: privyUserId,
       address,
       agentAddress: '',
       agentSystemPrompt: '',

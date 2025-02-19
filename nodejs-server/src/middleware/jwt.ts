@@ -4,11 +4,18 @@ import jwt from 'jsonwebtoken'
 import config from '../config'
 import createError from 'http-errors'
 
-const { JWT_SECRET } = config
+const { JWT_SECRET, PRIVY_PUBLIC_KEY } = config
 
 export type AuthenticatedRequest = express.Request & {
   user: {
     id: string
+    address: string
+  }
+}
+
+export type PrivyAuthenticatedRequest = express.Request & {
+  user: {
+    privyUserId: string
   }
 }
 
@@ -27,13 +34,15 @@ export const jwtMiddleware = (
   if (
     !decoded ||
     typeof decoded !== 'object' ||
-    !decoded.id
+    !decoded.id ||
+    !decoded.address
   ) {
     throw createError(401, 'Unauthorized')
   }
 
   ;(req as AuthenticatedRequest).user = {
     id: decoded.id,
+    address: decoded.address,
   }
   next()
 }
@@ -48,8 +57,17 @@ export const privyJwtMiddleware = (
     throw createError(401, 'Unauthorized')
   }
 
-  const decoded = jwt.verify(token, JWT_SECRET)
+  const verified = jwt.verify(token, PRIVY_PUBLIC_KEY, { algorithms: ['ES256'] })
+  console.log('verified', verified)
+  if (!verified) {
+    throw createError(401, 'Unauthorized')
+  }
+
+  const decoded = jwt.decode(token)
   console.log('decoded', decoded)
+  ;(req as PrivyAuthenticatedRequest).user = {
+    privyUserId: decoded?.sub as string,
+  }
   next()
 }
 
@@ -57,11 +75,13 @@ export const issueJWT = (
   user: Prisma.UserGetPayload<{
     select: {
       id: true
+      address: true
     }
   }>
 ) => {
   const payload = {
     id: user.id,
+    address: user.address,
   }
   return jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' })
 }
