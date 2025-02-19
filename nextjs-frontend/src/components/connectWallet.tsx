@@ -1,76 +1,23 @@
 'use client'
 
 import { usePrivy } from '@privy-io/react-auth'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useContext, useEffect } from 'react'
 import CTAButton from './cta'
 import { DialogContent } from './dialog'
+import { UserContext } from '@/providers/userProvider'
 
 export const RegisterWallet = ({}: {
   setDialog: (dialog: DialogContent) => void
 }) => {
-  const { logout, user, login, authenticated, getAccessToken } = usePrivy()
+  const { user, clearUser, getToken } = useContext(UserContext)
+  const { logout, user: privyUser, login, authenticated } = usePrivy()
 
-  const address = user?.wallet?.address
+  const address = user?.address || privyUser?.wallet?.address
 
-  const getToken = useCallback(async (address: string) => {
-    try {
-      const token = await getAccessToken()
-      if (!token) {
-        throw new Error('No token found')
-      }
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/token?address=${address}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
-      const data = await response.json()
-      console.log(data)
-    } catch (error) {
-      console.log(error)
-    }
-  }, [getAccessToken])
-
-  // const registerWallet = useCallback(
-  //   async (address: string, domain: string, systemPrompt: string) => {
-  //     try {
-  //       const response = await fetch(
-  //         `${process.env.NEXT_PUBLIC_WALLET_HOST}/register/wallet`,
-  //         {
-  //           method: 'POST',
-  //           body: JSON.stringify({ address, domain, systemPrompt }),
-  //         }
-  //       )
-
-  //       const data = await response.json()
-  //       console.log(data)
-  //       if (data.error === 'Wallet already exists') {
-  //         setDialog({
-  //           TITLE: 'agent-found',
-  //           CONTENT: `An agent with this domain and system prompt already exists. It's wallet address is ${data.address}. Use a different domain or system prompt to register a new agent.`,
-  //         })
-
-  //         return
-  //       }
-
-  //       setDialog({
-  //         TITLE: 'agent-created',
-  //         CONTENT: `A wallet has been created for your agent. It's wallet address is ${data.address}. You can now use the registered domain to send attestations and use this wallet.`,
-  //       })
-  //     } catch (error) {
-  //       console.log(error)
-  //       if (
-  //         error instanceof Error &&
-  //         error.message === 'Wallet already exists'
-  //       ) {
-  //         console.log('Wallet already exists')
-  //       }
-  //     }
-  //   },
-  //   [setDialog]
-  // )
+  const handleLogout = useCallback(() => {
+    clearUser()
+    logout()
+  }, [clearUser, logout])
 
   useEffect(() => {
     if (!address || !authenticated) return
@@ -136,12 +83,8 @@ export const RegisterWallet = ({}: {
 
         {authenticated && address ? (
           <CTAButton
-            onClick={() => {
-              // if (!domain || !systemPrompt) {
-              //   return
-              // }
-              // registerWallet(address, domain, systemPrompt)
-            }}
+            asLink={`/${address}`}
+            onClick={() => {}}
           >
             Create Agent
           </CTAButton>
@@ -155,10 +98,10 @@ export const RegisterWallet = ({}: {
           </CTAButton>
         )}
       </div>
-      {user?.wallet?.address && (
+      {address && (
         <div className="absolute bottom-[-24px] right-0">
           <div className="flex flex-col text-xs font-bold w-full">
-            <div className="cursor-pointer" onClick={logout}>
+            <div className="cursor-pointer" onClick={handleLogout}>
               ⦿ Disconnect Wallet
             </div>
           </div>
