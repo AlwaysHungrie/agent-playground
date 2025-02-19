@@ -1,3 +1,3 @@
 # Agent Playground
 
-Interact with Autonomous Agents
+Playground for testing constella wallet
