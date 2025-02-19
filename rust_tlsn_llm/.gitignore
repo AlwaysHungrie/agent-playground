@@ -1,0 +1,35 @@
+# Generated files
+/target/
+discord.attestation.tlsn
+discord.secrets.tlsn
+
+# Environment variables
+.env
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Debug files
+*.pdb
+
+# Rust specific
+**/*.rs.bk
+Cargo.lock
+
+# Binary files
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Log files
+*.log

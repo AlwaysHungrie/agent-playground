@@ -1,11 +1,13 @@
 import express from 'express'
 import authRouter from './authRoutes'
 import userRouter from './userRoutes'
+import llmRouter from './llmRouter'
 
 const router = express.Router()
 
 router.use('/auth', authRouter)
 router.use('/user', userRouter)
+router.use('/llm', llmRouter)
 
 // Global error handling middleware
 router.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

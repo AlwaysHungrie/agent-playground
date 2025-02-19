@@ -183,7 +183,7 @@ export default function UserPage() {
         />
       </div>
       <div className="flex-1 flex flex-col gap-4 h-full">
-        <ChatInterface />
+        <ChatInterface agentAddress={addressInPath} />
       </div>
     </div>
   )
