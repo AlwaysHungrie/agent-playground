@@ -8,7 +8,14 @@ import { body } from 'express-validator'
 
 const llmRouter = express.Router()
 
-const { RUST_BINARY_PATH, OPENAI_API_KEY, BACKEND_URL } = config
+const {
+  RUST_BINARY_PATH,
+  OPENAI_API_KEY,
+  BACKEND_URL,
+  NOTARY_HOST,
+  NOTARY_PORT,
+  NOTARY_TLS,
+} = config
 
 // Types
 interface ExecuteRequestBody {
@@ -64,11 +71,10 @@ const buildRustCommand = (
     '--output-prefix',
     outputPrefix,
     '--notary-host',
-    'notary.pineappl.xyz',
+    NOTARY_HOST,
     '--notary-port',
-    '443',
-    '--notary-tls',
-  ].join(' ')
+    NOTARY_PORT.toString(),
+  ].join(' ') + (NOTARY_TLS ? ' --notary-tls' : '')
 }
 
 // Route handlers
@@ -97,7 +103,10 @@ llmRouter.post(
           return
         }
 
-        const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` }
+        const headers = {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        }
         const command = buildRustCommand(
           url,
           headers,
@@ -123,7 +132,10 @@ llmRouter.post(
 
 llmRouter.post(
   '/:agentOwnerAddress/message',
-  body('message').isString().isLength({ min: 1 }).withMessage('Message is required'),
+  body('message')
+    .isString()
+    .isLength({ min: 1 })
+    .withMessage('Message is required'),
   handleValidationErrors,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
@@ -149,12 +161,18 @@ llmRouter.post(
       const outputPrefixPrivate = `${userDir}-private-${Date.now()}`
 
       // this is a request to be made to llm provider
-      const llmRequest = {
+      const llmRequest: any = {
         messages: [
           { role: 'system', content: user.agentSystemPrompt },
           { role: 'user', content: message },
         ],
         model: 'gpt-4o-mini',
+        max_tokens: 1000,
+      }
+
+      if (user.agentFunctions) {
+        llmRequest.functions = JSON.parse(user.agentFunctions)
+        llmRequest.function_call = 'auto'
       }
 
       // this is a request to be made to the execute endpoint

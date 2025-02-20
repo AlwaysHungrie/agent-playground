@@ -5,6 +5,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { Message } from './chatInterface'
+import CTAButton from '../cta'
 
 interface AttestationProps {
   type: 'public' | 'private'
@@ -74,6 +75,34 @@ const AttestationPopover = ({ type, attestationUrl }: AttestationProps) => {
   )
 }
 
+const FunctionCall = ({ message }: { message: Message }) => {
+  if (!message.isFunctionCall) {
+    return null
+  }
+
+  return (
+    <div className="flex flex-col">
+      <p className="mb-2 px-4 pt-2 text-sm italic">
+        Agent decided to call a function:
+      </p>
+      <div className="flex flex-col gap-2 mx-4 px-4 pb-4 pt-2 bg-gray-100 rounded-lg self-center">
+        <p className="font-bold">{message.functionCallName}</p>
+        <p className="text-sm bg-white rounded-sm p-2 overflow-x-auto max-w-[300px]">
+          {message.functionCallParameters}
+        </p>
+        <CTAButton
+          onClick={() => {
+            console.log('Call Function')
+          }}
+          className="mt-2"
+        >
+          Execute With Constella
+        </CTAButton>
+      </div>
+    </div>
+  )
+}
+
 const BotMessage = ({ message }: { message: Message }) => {
   const backgroundColor = message.isError ? 'bg-red-100' : 'bg-white'
 
@@ -82,7 +111,11 @@ const BotMessage = ({ message }: { message: Message }) => {
       <div
         className={`${backgroundColor} border border-gray-200 rounded-t-lg rounded-br-lg max-w-[80%] flex flex-col`}
       >
-        <p className="mb-2 px-4 pt-2">{message.text}</p>
+        {message.isFunctionCall ? (
+          <FunctionCall message={message} />
+        ) : (
+          <p className="mb-2 px-4 pt-2">{message.text}</p>
+        )}
 
         <div className="flex p-2">
           <div className="text-xs text-gray-400 mr-1">Response Verified:</div>

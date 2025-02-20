@@ -20,12 +20,16 @@ router.post(
     .isString()
     .isLength({ min: 10 })
     .withMessage('Agent system prompt must be at least 10 characters long'),
+  body('agentFunctions')
+    .optional()
+    .isArray()
+    .withMessage('Agent functions must be an array'),
   handleValidationErrors,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const { agentAddress, agentSystemPrompt } = req.body
+    const { agentAddress, agentSystemPrompt, agentFunctions } = req.body
     const updatedUser = await prisma.user.update({
       where: { id: req.user.id },
-      data: { agentAddress, agentSystemPrompt },
+      data: { agentAddress, agentSystemPrompt, agentFunctions: JSON.stringify(agentFunctions) },
     })
     res.json({ success: true, updatedUser })
   })

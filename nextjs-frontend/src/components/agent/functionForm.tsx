@@ -102,7 +102,6 @@ const FunctionForm = ({
       parameters: {
         ...llmFunction.parameters,
         properties: newProperties,
-        required: llmFunction.parameters.required.filter((_, i) => i !== index)
       }
     });
   };

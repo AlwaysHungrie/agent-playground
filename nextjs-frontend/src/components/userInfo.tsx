@@ -26,7 +26,7 @@ export const UserInfo = () => {
     if (!user?.address || user?.address !== privyAddress) {
       return (
         <div className="flex items-center">
-        <div className="px-4 py-2 border text-sm border-[#004400] bg-[#001800] text-white rounded-l-md">
+        <div className="px-4 py-2 border text-sm border-[#004400] bg-[#001800] text-[#00ff00] rounded-l-md">
           Not Connected
         </div>
         <div 
@@ -42,7 +42,7 @@ export const UserInfo = () => {
     }
     return (
       <div className="flex items-center">
-        <div className="px-4 py-2 border text-sm border-[#004400] bg-[#001800] text-white rounded-l-md">
+        <div className="px-4 py-2 border text-sm border-[#004400] bg-[#001800] text-[#00ff00] rounded-l-md">
           {formatAddress(user?.address)}
         </div>
         <div 

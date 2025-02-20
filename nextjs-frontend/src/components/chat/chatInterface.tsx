@@ -13,6 +13,9 @@ export interface Message {
   text: string
   privateAttestation?: string
   publicAttestation?: string
+  isFunctionCall?: boolean
+  functionCallName?: string
+  functionCallParameters?: string
 }
 
 const UserMessage = ({ message }: { message: Message }) => {
@@ -90,10 +93,18 @@ const ChatInterface = ({
 
       let isError = false
       let reply = 'Unknown error occurred'
+      let isFunctionCall = false
+      let functionCallName = undefined
+      let functionCallParameters = undefined
 
       if (llmResponsePublic && llmResponse && !error) {
         if (llmResponse.choices && llmResponse.choices[0].message) {
           reply = llmResponse.choices[0].message.content
+          if (llmResponse.choices[0].message.function_call) {
+            isFunctionCall = true
+            functionCallName = llmResponse.choices[0].message.function_call.name
+            functionCallParameters = llmResponse.choices[0].message.function_call.arguments
+          }
         } else {
           isError = true
           reply = 'Agent did not generate a response'
@@ -116,6 +127,9 @@ const ChatInterface = ({
           isError,
           privateAttestation,
           publicAttestation,
+          isFunctionCall,
+          functionCallName,
+          functionCallParameters,
         },
       ])
       setIsLoading(false)

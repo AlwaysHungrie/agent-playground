@@ -32,6 +32,10 @@ const AWS_REGION = process.env.AWS_REGION || 'ap-south-1'
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000'
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001'
 
+const NOTARY_HOST = process.env.NOTARY_HOST || '0.0.0.0'
+const NOTARY_PORT = process.env.NOTARY_PORT || 7047
+const NOTARY_TLS = process.env.NOTARY_TLS === 'true' || false
+
 export default {
   PORT,
   JWT_SECRET,
@@ -45,4 +49,7 @@ export default {
   AWS_REGION,
   FRONTEND_URL,
   BACKEND_URL,
+  NOTARY_HOST,
+  NOTARY_PORT,
+  NOTARY_TLS,
 }

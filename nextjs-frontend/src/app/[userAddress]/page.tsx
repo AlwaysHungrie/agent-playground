@@ -26,13 +26,69 @@ import { HiHome } from 'react-icons/hi'
 //           },
 //           "amount": {
 //             "type": "number",
-//             "description": "Amount of test ETH to send (fixed at 0.5)"
+//             "description": "Amount of test ETH to send (cannot exceed 0.05)"
 //           }
 //         },
 //         "required": ["address", "amount"]
 //       }
 //     }
 //   ],
+
+// Convert from object format back to JSON format
+export function convertLlmFunctionsToJson(
+  objectFunctions: LlmFunctionConfig[]
+): JsonLlmFunction[] {
+  return objectFunctions.map((objFunc) => {
+    // Convert the properties array to an object
+    const properties: { [key: string]: { type: string; description: string; } } =
+      {}
+    objFunc.parameters.properties.forEach((prop) => {
+      properties[prop.name] = {
+        type: prop.type,
+        description: prop.description,
+      }
+    })
+
+    const required = objFunc.parameters.properties.map((prop) => {
+      return prop.isRequired ? prop.name : null
+    }).filter((prop) => prop !== null)
+
+    return {
+      name: objFunc.name,
+      description: objFunc.description,
+      parameters: {
+        type: "object",
+        properties,
+        required,
+      },
+    }
+  })
+}
+
+const parseLlmFunctionsJson = (jsonFunctions: JsonLlmFunction[]): LlmFunctionConfig[] => {
+  return jsonFunctions.map((jsonFunc) => {
+    // Convert the properties object to an array of properties
+    const properties = Object.entries(jsonFunc.parameters.properties).map(
+      ([name, prop]) => ({
+        name,
+        type: prop.type,
+        description: prop.description,
+        isRequired: jsonFunc.parameters.required.includes(name)
+      })
+    );
+
+    return {
+      id: crypto.randomUUID(),
+      name: jsonFunc.name,
+      description: jsonFunc.description,
+      parameters: {
+        type: jsonFunc.parameters.type,
+        properties,
+        required: jsonFunc.parameters.required
+      }
+    };
+  });
+}
 
 export interface LlmFunctionConfig {
   id: string
@@ -44,7 +100,6 @@ export interface LlmFunctionConfig {
 export interface LlmFunctionParameters {
   type: string
   properties: LlmFunctionProperty[]
-  required: string[]
 }
 
 export interface LlmFunctionProperty {
@@ -54,15 +109,30 @@ export interface LlmFunctionProperty {
   isRequired: boolean
 }
 
+type JsonLlmFunction = {
+  name: string;
+  description: string;
+  parameters: {
+      type: string;
+      properties: {
+          [key: string]: {
+              type: string;
+              description: string;
+          };
+      };
+      required: (string)[];
+  };
+}
+
 export default function UserPage() {
   const pathname = usePathname()
   const [loading, setLoading] = useState(true)
   const [agentNotFound, setAgentNotFound] = useState(false)
-  
+
   const [agentAddress, setAgentAddress] = useState('')
   const [agentSystemPrompt, setAgentSystemPrompt] = useState('')
   const [agentFunctions, setAgentFunctions] = useState<LlmFunctionConfig[]>([])
-  
+
   const [isSaving, setIsSaving] = useState(false)
 
   const [newAgent, setNewAgent] = useState(false)
@@ -83,7 +153,10 @@ export default function UserPage() {
       )
       const data = await response.json()
       console.log('get agent data', data)
-      const { success, user: { agentAddress, agentSystemPrompt } = {} } = data
+      const { success, user: { agentAddress, agentSystemPrompt, agentFunctions } = {} } = data
+
+      const parsedFunctions = parseLlmFunctionsJson(JSON.parse(agentFunctions))
+      console.log('parsed functions', parsedFunctions)
 
       if (!success) {
         console.log('agent not found')
@@ -100,6 +173,7 @@ export default function UserPage() {
 
       setAgentAddress(agentAddress ?? '')
       setAgentSystemPrompt(agentSystemPrompt ?? '')
+      setAgentFunctions(parsedFunctions)
     } catch (error) {
       console.error(error)
     } finally {
@@ -109,12 +183,14 @@ export default function UserPage() {
 
   const saveAgentInfo = useCallback(async () => {
     try {
+      const jsonFunctions = convertLlmFunctionsToJson(agentFunctions)
       const body = {
         agentAddress,
         agentSystemPrompt,
+        agentFunctions: jsonFunctions,
       }
 
-      console.log(body)
+      console.log('body', body)
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/agentInfo`,
@@ -142,9 +218,17 @@ export default function UserPage() {
     } finally {
       setIsSaving(false)
     }
-  }, [agentAddress, agentSystemPrompt, user])
+  }, [agentAddress, agentSystemPrompt, agentFunctions, user])
 
   const handleSave = useCallback(async () => {
+    console.log('handle save')
+
+    // const jsonFunctions = convertLlmFunctionsToJson(agentFunctions)
+    // console.log('json functions', jsonFunctions)
+
+    // const parsedFunctions = parseLlmFunctionsJson(jsonFunctions)
+    // console.log('parsed functions', parsedFunctions)
+
     setIsSaving(true)
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000))
@@ -174,7 +258,8 @@ export default function UserPage() {
             <div className="text-center flex flex-col gap-4">
               <p>Unable to find an agent for this account.</p>
               <p className="text-gray-600">
-                If you are the owner of this address, visit the home page and connect your wallet.
+                If you are the owner of this address, visit the home page and
+                connect your wallet.
               </p>
               <CTAButton asLink="/" className="mt-2" onClick={() => {}}>
                 Back to Home
@@ -212,7 +297,10 @@ export default function UserPage() {
     <div className="h-screen bg-gray-50 flex">
       <div className="max-w-sm mx-auto h-full overflow-y-auto bg-white">
         <div className="w-full flex items-center gap-4 px-4 py-4 border-b border-gray-200 bg-gray-100">
-          <Link href="/" className="mr-auto bg-gray-200 rounded-full p-2 hover:bg-gray-300">
+          <Link
+            href="/"
+            className="mr-auto bg-gray-200 rounded-full p-2 hover:bg-gray-300 text-[#004400]"
+          >
             <HiHome className="w-4 h-4" />
           </Link>
           <UserInfo />

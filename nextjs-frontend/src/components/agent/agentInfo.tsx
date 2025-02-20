@@ -44,8 +44,7 @@ export default function AgentInfo({
       description: 'Add a description for the function',
       parameters: {
         type: 'object',
-        properties: [], // Now an array instead of an object
-        required: []
+        properties: [],
       }
     };
     setLlmFunctions([...llmFunctions, newFunction]);
@@ -117,7 +116,7 @@ export default function AgentInfo({
 
           {llmFunctions.map((llmFunction) => (
             <FunctionForm
-              key={llmFunction.name}
+              key={llmFunction.id}
               llmFunction={llmFunction}
               updateLlmFunction={updateLlmFunction}
               onDelete={deleteLlmFunction}
