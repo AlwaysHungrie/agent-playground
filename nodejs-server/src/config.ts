@@ -29,6 +29,9 @@ if (!AWS_SECRET_ACCESS_KEY) {
 }
 const AWS_REGION = process.env.AWS_REGION || 'ap-south-1'
 
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000'
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001'
+
 export default {
   PORT,
   JWT_SECRET,
@@ -40,4 +43,6 @@ export default {
   AWS_ACCESS_KEY_ID,
   AWS_SECRET_ACCESS_KEY,
   AWS_REGION,
+  FRONTEND_URL,
+  BACKEND_URL,
 }

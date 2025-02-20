@@ -8,7 +8,7 @@ import { body } from 'express-validator'
 
 const llmRouter = express.Router()
 
-const { RUST_BINARY_PATH, OPENAI_API_KEY } = config
+const { RUST_BINARY_PATH, OPENAI_API_KEY, BACKEND_URL } = config
 
 // Types
 interface ExecuteRequestBody {
@@ -64,9 +64,10 @@ const buildRustCommand = (
     '--output-prefix',
     outputPrefix,
     '--notary-host',
-    '13.127.148.49',
+    'notary.pineappl.xyz',
     '--notary-port',
-    '7047',
+    '443',
+    '--notary-tls',
   ].join(' ')
 }
 
@@ -167,7 +168,7 @@ llmRouter.post(
 
       const headers = { 'Content-Type': 'application/json' }
       const command = buildRustCommand(
-        'https://ebcb-2401-4900-4e55-ca99-8002-fefb-9985-9928.ngrok-free.app/api/v1/llm/execute',
+        `${BACKEND_URL}/api/v1/llm/execute`,
         headers,
         executeRequest,
         userDir,

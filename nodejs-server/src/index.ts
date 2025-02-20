@@ -5,11 +5,14 @@ import config from "./config";
 import { asyncHandler } from "./middleware/misc";
 import { generateOneTimeDownloadUrl } from "./services/s3Service";
 
-const { PORT } = config;
+const { PORT, FRONTEND_URL } = config;
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: FRONTEND_URL,
+  credentials: true,
+}));
 app.use(express.json());
 
 app.use("/api/v1", apiRouter);
