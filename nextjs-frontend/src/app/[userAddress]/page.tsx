@@ -166,7 +166,7 @@ export default function UserPage() {
       <div className="max-w-sm mx-auto h-full overflow-y-auto bg-white">
         <div className="w-full flex items-center gap-4 px-4 py-4 border-b border-gray-200 bg-gray-100">
           <Link href="/" className="mr-auto bg-gray-200 rounded-full p-2 hover:bg-gray-300">
-            <HiHome className="w-6 h-6" />
+            <HiHome className="w-4 h-4" />
           </Link>
           <UserInfo />
         </div>

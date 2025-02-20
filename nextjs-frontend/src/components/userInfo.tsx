@@ -25,27 +25,30 @@ export const UserInfo = () => {
   const renderContent = () => {
     if (!user?.address || user?.address !== privyAddress) {
       return (
-        <div className="flex items-center gap-4">
-          <div className="bg-black text-white px-4 py-2 rounded-full">
-            Not Connected
-          </div>
-          <div
-            onClick={() => {
-              login()
-            }}
-            className="cursor-pointer text-xs"
-          >
-            Connect Wallet
-          </div>
+        <div className="flex items-center">
+        <div className="px-4 py-2 border text-sm border-[#004400] bg-[#001800] text-white rounded-l-md">
+          Not Connected
         </div>
+        <div 
+          onClick={() => {
+            login()
+          }}
+          className="whitespace-nowrap px-4 py-2 cursor-pointer text-xs rounded-r-md border-t border-b border-r border-transparent bg-gray-200 hover:bg-gray-300 text-gray-500 hover:text-[#001800] transition-all duration-300 ease-in-out text-center disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Connect Wallet
+        </div>
+      </div>
       )
     }
     return (
-      <div className="flex items-center gap-4">
-        <div className="bg-black text-white px-4 py-2 rounded-full">
+      <div className="flex items-center">
+        <div className="px-4 py-2 border text-sm border-[#004400] bg-[#001800] text-white rounded-l-md">
           {formatAddress(user?.address)}
         </div>
-        <div onClick={handleLogout} className="cursor-pointer text-xs">
+        <div 
+          onClick={handleLogout}
+          className="whitespace-nowrap px-4 py-2 cursor-pointer text-xs rounded-r-md border-t border-b border-r border-transparent bg-gray-200 hover:bg-gray-300 text-gray-500 hover:text-[#001800] transition-all duration-300 ease-in-out text-center disabled:opacity-50 disabled:cursor-not-allowed"
+        >
           Logout
         </div>
       </div>

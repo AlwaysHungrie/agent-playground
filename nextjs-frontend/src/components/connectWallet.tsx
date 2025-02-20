@@ -25,8 +25,8 @@ export const RegisterWallet = ({}: {
   }, [address, authenticated, getToken])
 
   return (
-    <div className="relative my-4 flex-1 flex flex-col justify-center aspect-[16/9] w-[400px] max-w-[90vw] mx-auto px-2 sm:px-4">
-      <div className="relative border rounded-lg p-4 backdrop-blur-[2px] flex flex-col h-full overflow-y-auto bg-white">
+    <div className="relative my-4 flex-1 flex flex-col justify-center aspect-[16/9] w-[500px] max-w-[90vw] mx-auto px-2 sm:px-4">
+      <div className="relative border rounded-lg p-4 backdrop-blur-[2px] flex flex-col h-full overflow-y-auto bg-white max-h-[650px]">
         <div className="text-2xl font-bold text-center">
           Constella Wallet Playground v0.0.1
           <br />

@@ -82,9 +82,8 @@ export default function AgentInfo({
               and connect your wallet which was used to create this page.
             </li>
             <li>
-              Enter the same system prompt as above and use this site as this
-              site i.e.{' '}
-              <span className="font-xs bg-red-100 p-px rounded-md">
+              Enter the same system prompt as above and use this site as the agent host i.e.{' '}
+              <span className="font-xs bg-red-100 py-px px-2 rounded-md">
                 https://playground.constella.one
               </span>
               . Make sure the system prompt and domain are exactly as above.

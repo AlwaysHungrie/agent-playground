@@ -28,11 +28,15 @@ const AttestationPopover = ({ type, attestationUrl }: AttestationProps) => {
     )
   }
 
+  const descriptionPrefix = 'This is a '
+  const descriptionType = type === 'public' ? 'public ' : 'private '
+
   const description =
     type === 'public'
-      ? 'This is a public proof that does not reveal the system prompt but requires a trusted third party to verify it.'
-      : 'This is a private proof that should only be shared with trusted parties as it contains the system prompt of the agent.'
+      ? 'that does not reveal the system prompt but requires a trusted third party to verify it.'
+      : 'that should only be shared with trusted parties as it contains the system prompt of the agent.'
 
+  const fileKey = attestationUrl.split('/').slice(3).join('/')
   return (
     <Popover>
       <PopoverTrigger>
@@ -40,8 +44,11 @@ const AttestationPopover = ({ type, attestationUrl }: AttestationProps) => {
       </PopoverTrigger>
       <PopoverContent className="absolute bg-white rounded-sm shadow-sm p-1 max-w-xs text-xs text-black whitespace-normal">
         <p>
+          {descriptionPrefix}
+          <span className="font-bold">{descriptionType}</span>
           {description}
           <br />
+          file key: <span className="break-all bg-yellow-100">{fileKey}</span>
           <br />
           Click here to{' '}
           <a

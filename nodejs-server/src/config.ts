@@ -19,6 +19,16 @@ if (!OPENAI_API_KEY) {
   throw new Error('OPENAI_API_KEY is not set')
 }
 
+const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID
+if (!AWS_ACCESS_KEY_ID) {
+  throw new Error('AWS_ACCESS_KEY_ID is not set')
+}
+const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY
+if (!AWS_SECRET_ACCESS_KEY) {
+  throw new Error('AWS_SECRET_ACCESS_KEY is not set')
+}
+const AWS_REGION = process.env.AWS_REGION || 'ap-south-1'
+
 export default {
   PORT,
   JWT_SECRET,
@@ -27,4 +37,7 @@ export default {
   PRIVY_APP_ID,
   RUST_BINARY_PATH,
   OPENAI_API_KEY,
+  AWS_ACCESS_KEY_ID,
+  AWS_SECRET_ACCESS_KEY,
+  AWS_REGION,
 }

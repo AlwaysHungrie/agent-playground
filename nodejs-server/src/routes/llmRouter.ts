@@ -63,6 +63,10 @@ const buildRustCommand = (
     userDir,
     '--output-prefix',
     outputPrefix,
+    '--notary-host',
+    '13.127.148.49',
+    '--notary-port',
+    '7047',
   ].join(' ')
 }
 
@@ -130,9 +134,6 @@ llmRouter.post(
         return
       }
 
-      // console.log('user', user)
-
-      // console.log('req.body', req.body)
       const { message } = req.body
 
       if (!message) {
@@ -166,7 +167,7 @@ llmRouter.post(
 
       const headers = { 'Content-Type': 'application/json' }
       const command = buildRustCommand(
-        'https://7cec-2401-4900-4e55-ca99-5c70-b000-7ba0-e2e0.ngrok-free.app/api/v1/llm/execute',
+        'https://ebcb-2401-4900-4e55-ca99-8002-fefb-9985-9928.ngrok-free.app/api/v1/llm/execute',
         headers,
         executeRequest,
         userDir,
