@@ -2,10 +2,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { formatAddress } from '@/utils/formatting'
-import Link from 'next/link'
 import CTAButton from '../cta'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import Instructions from './instructions'
+import { Button } from '../ui/button'
+import { LlmFunctionConfig } from '@/app/[userAddress]/page'
+import FunctionForm from './functionForm'
 
 export type AgentInfoProps = {
   addressInPath: string | undefined
@@ -17,6 +20,8 @@ export type AgentInfoProps = {
   setAgentAddress: (address: string) => void
   setAgentSystemPrompt: (prompt: string) => void
   handleSave: () => void
+  llmFunctions: LlmFunctionConfig[]
+  setLlmFunctions: React.Dispatch<React.SetStateAction<LlmFunctionConfig[]>>
 }
 
 export default function AgentInfo({
@@ -29,11 +34,41 @@ export default function AgentInfo({
   setAgentAddress,
   setAgentSystemPrompt,
   handleSave,
+  llmFunctions,
+  setLlmFunctions,
 }: AgentInfoProps) {
+  const addNewFunction = () => {
+    const newFunction: LlmFunctionConfig = {
+      id: crypto.randomUUID(),
+      name: 'New Function',
+      description: 'Add a description for the function',
+      parameters: {
+        type: 'object',
+        properties: [], // Now an array instead of an object
+        required: []
+      }
+    };
+    setLlmFunctions([...llmFunctions, newFunction]);
+  };
+
+  const updateLlmFunction = (updatedFunction: LlmFunctionConfig) => {
+    setLlmFunctions(
+      llmFunctions.map((f) =>
+        f.id === updatedFunction.id ? updatedFunction : f
+      )
+    )
+  }
+
+  const deleteLlmFunction = (functionId: string) => {
+    setLlmFunctions(llmFunctions.filter(f => f.id !== functionId));
+  };
+
   return (
     <Card
       className={cn(
-        newAgent ? 'bg-white' : 'bg-transparent border-none shadow-none rounded-none',
+        newAgent
+          ? 'bg-white'
+          : 'bg-transparent border-none shadow-none rounded-none'
       )}
     >
       <CardHeader>
@@ -47,7 +82,7 @@ export default function AgentInfo({
         <div className="space-y-2">
           <label className="text-base">System Prompt</label>
           <Textarea
-            className="min-h-40 resize-y"
+            className="min-h-40 resize-y bg-gray-100"
             value={agentSystemPrompt}
             onChange={(e) => setAgentSystemPrompt(e.target.value)}
             readOnly={!isOwner}
@@ -58,6 +93,7 @@ export default function AgentInfo({
         <div className="space-y-2">
           <label className="text-base">Autonomous Wallet Address</label>
           <Input
+            className="bg-gray-100"
             value={agentAddress}
             onChange={(e) => setAgentAddress(e.target.value)}
             readOnly={!isOwner}
@@ -66,47 +102,37 @@ export default function AgentInfo({
         </div>
 
         <div className="space-y-2">
-          <label className="text-base">
-            Follow these steps to get an autonomous wallet address:
+          <label className="text-base flex items-center gap-2">
+            Functions
+            <Button
+              onClick={addNewFunction}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Add Function
+            </Button>
           </label>
-          <ol className="list-decimal pl-5 text-sm">
-            <li>
-              Visit{' '}
-              <Link
-                href="https://constella.one"
-                target="_blank"
-                className="text-blue-500"
-              >
-                Constella
-              </Link>{' '}
-              and connect your wallet which was used to create this page.
-            </li>
-            <li>
-              Enter the same system prompt as above and use this site as the agent host i.e.{' '}
-              <span className="font-xs bg-red-100 py-px px-2 rounded-md">
-                https://playground.constella.one
-              </span>
-              . Make sure the system prompt and domain are exactly as above.
-            </li>
-            <li>
-              For a given domain and system prompt, you can only generate one
-              wallet address on Constella, so you will need to create a new
-              account on playground to lauch another agent with same system
-              prompt.
-            </li>
-            <li>
-              Use the wallet address generated for you. You can also use the
-              same wallet address if this agent was already registered.
-            </li>
-          </ol>
+
+          {llmFunctions.map((llmFunction) => (
+            <FunctionForm
+              key={llmFunction.name}
+              llmFunction={llmFunction}
+              updateLlmFunction={updateLlmFunction}
+              onDelete={deleteLlmFunction}
+            />
+          ))}
         </div>
+
+        <Instructions />
 
         {isOwner && (
           <div className="pt-4">
             <CTAButton
               onClick={handleSave}
               disabled={isSaving}
-              className="w-full"
+              className="w-full flex items-center justify-center"
             >
               {isSaving ? (
                 <>

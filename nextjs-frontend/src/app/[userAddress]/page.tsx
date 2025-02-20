@@ -13,12 +13,56 @@ import { UserInfo } from '@/components/userInfo'
 import Link from 'next/link'
 import { HiHome } from 'react-icons/hi'
 
+// "functions": [
+//     {
+//       "name": "send_eth",
+//       "description": "Sends test ETH to the specified Ethereum address",
+//       "parameters": {
+//         "type": "object",
+//         "properties": {
+//           "address": {
+//             "type": "string",
+//             "description": "Valid Ethereum address starting with 0x"
+//           },
+//           "amount": {
+//             "type": "number",
+//             "description": "Amount of test ETH to send (fixed at 0.5)"
+//           }
+//         },
+//         "required": ["address", "amount"]
+//       }
+//     }
+//   ],
+
+export interface LlmFunctionConfig {
+  id: string
+  name: string
+  description: string
+  parameters: LlmFunctionParameters
+}
+
+export interface LlmFunctionParameters {
+  type: string
+  properties: LlmFunctionProperty[]
+  required: string[]
+}
+
+export interface LlmFunctionProperty {
+  type: string
+  description: string
+  name: string
+  isRequired: boolean
+}
+
 export default function UserPage() {
   const pathname = usePathname()
   const [loading, setLoading] = useState(true)
   const [agentNotFound, setAgentNotFound] = useState(false)
+  
   const [agentAddress, setAgentAddress] = useState('')
   const [agentSystemPrompt, setAgentSystemPrompt] = useState('')
+  const [agentFunctions, setAgentFunctions] = useState<LlmFunctionConfig[]>([])
+  
   const [isSaving, setIsSaving] = useState(false)
 
   const [newAgent, setNewAgent] = useState(false)
@@ -103,6 +147,7 @@ export default function UserPage() {
   const handleSave = useCallback(async () => {
     setIsSaving(true)
     try {
+      await new Promise((resolve) => setTimeout(resolve, 1000))
       await saveAgentInfo()
     } finally {
       setIsSaving(false)
@@ -155,6 +200,8 @@ export default function UserPage() {
             setAgentAddress={setAgentAddress}
             setAgentSystemPrompt={setAgentSystemPrompt}
             handleSave={handleSave}
+            llmFunctions={agentFunctions}
+            setLlmFunctions={setAgentFunctions}
           />
         </div>
       </div>
@@ -180,6 +227,8 @@ export default function UserPage() {
           setAgentAddress={setAgentAddress}
           setAgentSystemPrompt={setAgentSystemPrompt}
           handleSave={handleSave}
+          llmFunctions={agentFunctions}
+          setLlmFunctions={setAgentFunctions}
         />
       </div>
       <div className="flex-1 flex flex-col gap-4 h-full">

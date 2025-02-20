@@ -22,4 +22,5 @@ model User {
 
   agentAddress String
   agentSystemPrompt String
+  agentFunctions String?
 }
