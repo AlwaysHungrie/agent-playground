@@ -51,6 +51,71 @@ const executeRustCommand = (command: string): Promise<any> => {
   })
 }
 
+const sanitizeJsonString = (jsonString: string): string => {
+  if (!jsonString) {
+    return ''
+  }
+
+  try {
+    // First, verify it's valid JSON
+    JSON.parse(jsonString)
+
+    // Replace characters that could cause shell interpretation issues
+    return (
+      jsonString
+        // Escape single quotes
+        .replace(/'/g, "'\\''")
+        // Escape double quotes that aren't already escaped
+        .replace(/(?<!\\)"/g, '\\"')
+        // Escape backticks
+        .replace(/`/g, '\\`')
+        // Escape dollar signs
+        .replace(/\$/g, '\\$')
+        // Escape parentheses
+        .replace(/\(/g, '\\(')
+        .replace(/\)/g, '\\)')
+        // Escape square brackets
+        .replace(/\[/g, '\\[')
+        .replace(/\]/g, '\\]')
+        // Escape curly braces
+        .replace(/\{/g, '\\{')
+        .replace(/\}/g, '\\}')
+        // Escape pipe
+        .replace(/\|/g, '\\|')
+        // Escape ampersand
+        .replace(/&/g, '\\&')
+        // Escape semicolon
+        .replace(/;/g, '\\;')
+        // Escape greater/less than
+        .replace(/</g, '\\<')
+        .replace(/>/g, '\\>')
+        // Escape newlines
+        .replace(/\n/g, '\\n')
+        // Escape tabs
+        .replace(/\t/g, '\\t')
+        // Escape asterisk
+        .replace(/\*/g, '\\*')
+        // Escape question mark
+        .replace(/\?/g, '\\?')
+        // Escape hash
+        .replace(/#/g, '\\#')
+        // Escape tilde
+        .replace(/~/g, '\\~')
+        // Escape caret
+        .replace(/\^/g, '\\^')
+        // Escape backslash that isn't already escaping something
+        .replace(/(?<!\\)\\/g, '\\\\')
+    )
+  } catch (error) {
+    console.error(`Error sanitizing JSON string: ${error}`)
+    throw new Error(
+      `Invalid JSON string: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`
+    )
+  }
+}
+
 const buildRustCommand = (
   url: string,
   headers: Record<string, string>,
@@ -59,25 +124,27 @@ const buildRustCommand = (
   outputPrefix: string,
   privateWords: string
 ): string => {
-  return [
-    RUST_BINARY_PATH,
-    '--url',
-    `'${url}'`,
-    '--headers',
-    `'${JSON.stringify(headers)}'`,
-    '--request-json',
-    `'${JSON.stringify(requestJson)}'`,
-    '--user-dir',
-    userDir,
-    '--output-prefix',
-    outputPrefix,
-    '--notary-host',
-    NOTARY_HOST,
-    '--notary-port',
-    NOTARY_PORT.toString(),
-    '--private-words',
-    privateWords,
-  ].join(' ') + (NOTARY_TLS ? ' --notary-tls' : '')
+  return (
+    [
+      RUST_BINARY_PATH,
+      '--url',
+      `'${url}'`,
+      '--headers',
+      `'${JSON.stringify(headers)}'`,
+      '--request-json',
+      `'${sanitizeJsonString(JSON.stringify(requestJson))}'`,
+      '--user-dir',
+      userDir,
+      '--output-prefix',
+      outputPrefix,
+      '--notary-host',
+      NOTARY_HOST,
+      '--notary-port',
+      NOTARY_PORT.toString(),
+      '--private-words',
+      privateWords,
+    ].join(' ') + (NOTARY_TLS ? ' --notary-tls' : '')
+  )
 }
 
 // Route handlers
