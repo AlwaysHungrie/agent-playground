@@ -37,8 +37,12 @@ impl ApiClient {
             builder = builder.header(key, value);
         }
 
-        let request = builder.body(Full::new(Bytes::from(request_json.to_string())))?;
+        let parsed_json: serde_json::Value = serde_json::from_str(&request_json)?;
+        let request = builder.body(Full::new(Bytes::from(serde_json::to_string(&parsed_json)?)))?;
+        
         Ok(request)
+        // let request = builder.body(Full::new(Bytes::from(request_json.to_string())))?;
+        // Ok(request)
     }
 }
 
