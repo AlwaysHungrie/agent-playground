@@ -56,7 +56,8 @@ const buildRustCommand = (
   headers: Record<string, string>,
   requestJson: Record<string, any>,
   userDir: string,
-  outputPrefix: string
+  outputPrefix: string,
+  privateWords: string
 ): string => {
   return [
     RUST_BINARY_PATH,
@@ -74,6 +75,8 @@ const buildRustCommand = (
     NOTARY_HOST,
     '--notary-port',
     NOTARY_PORT.toString(),
+    '--private-words',
+    privateWords,
   ].join(' ') + (NOTARY_TLS ? ' --notary-tls' : '')
 }
 
@@ -112,7 +115,8 @@ llmRouter.post(
           headers,
           llmRequest,
           userDir,
-          outputPrefix
+          outputPrefix,
+          `${OPENAI_API_KEY}`
         )
 
         console.log('command', command)
@@ -190,7 +194,8 @@ llmRouter.post(
         headers,
         executeRequest,
         userDir,
-        outputPrefix
+        outputPrefix,
+        `${OPENAI_API_KEY}`
       )
 
       const result = await executeRustCommand(command)

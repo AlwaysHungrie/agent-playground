@@ -38,6 +38,9 @@ pub struct Config {
 
     #[arg(long)]
     pub save_intermediate: bool,
+
+    #[arg(long)]
+    pub private_words: String,
 }
 
 impl Config {

@@ -60,7 +60,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     // Process proof and generate presentation
     let prover = prover_task.await??;
-    let presentation = generate_presentation(prover).await?;
+    let presentation = generate_presentation(prover, &config).await?;
 
     // Upload to S3
     let storage = StorageService::new("tlsn-notary-test", "ap-south-1");
@@ -76,7 +76,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-async fn generate_presentation(prover: Prover<Closed>) -> Result<Presentation, Box<dyn std::error::Error>> {
+async fn generate_presentation(prover: Prover<Closed>, config: &Config) -> Result<Presentation, Box<dyn std::error::Error>> {
     let mut prover = prover.start_notarize();
     
     // Get transcripts
@@ -84,8 +84,30 @@ async fn generate_presentation(prover: Prover<Closed>) -> Result<Presentation, B
     let recv_transcript = prover.transcript().received();
 
     // Set everything as public
-    let sent_public_ranges = RangeSet::from([(0..sent_transcript.len())]);
-    let recv_public_ranges = RangeSet::from([(0..recv_transcript.len())]);
+
+    // println!("Sent transcript: {:?}", sent_transcript);
+    // println!("Recv transcript: {:?}", recv_transcript);
+
+    // let private_words_bytes = config.private_words.as_bytes();
+    let private_words_bytes: Vec<Vec<u8>> = config.private_words
+        .split(';')
+        .map(|s| s.as_bytes().to_vec())
+        .collect();
+
+    // println!("Private words: {:?}", private_words_bytes);
+
+    let private_word_refs: Vec<&[u8]> = private_words_bytes.iter()
+        .map(|v| v.as_slice())
+        .collect();
+
+    let (sent_public_ranges, _) = find_ranges(&sent_transcript, &private_word_refs);
+    let (recv_public_ranges, _) = find_ranges(&recv_transcript, &private_word_refs);
+
+    // println!("Sent public ranges: {:?}", sent_public_ranges);
+    // println!("Recv public ranges: {:?}", recv_public_ranges);
+
+    // let sent_public_ranges = RangeSet::from([(0..sent_transcript.len())]);
+    // let recv_public_ranges = RangeSet::from([(0..recv_transcript.len())]);
 
     let mut builder = TranscriptCommitConfig::builder(prover.transcript());
     builder.commit_sent(&sent_public_ranges).unwrap();
@@ -132,4 +154,64 @@ async fn generate_presentation(prover: Prover<Closed>) -> Result<Presentation, B
     let presentation: Presentation = builder.build()?;
     
     Ok(presentation)
+}
+
+fn find_ranges(seq: &[u8], sub_seq: &[&[u8]]) -> (RangeSet<usize>, RangeSet<usize>) {
+    let mut private_ranges = Vec::new();
+    
+    // Find all occurrences of each private word
+    for s in sub_seq {
+        let mut start_idx = 0;
+        while let Some(idx) = find_subsequence(&seq[start_idx..], s) {
+            let abs_idx = start_idx + idx;
+            private_ranges.push(abs_idx..(abs_idx + s.len()));
+            start_idx = abs_idx + 1; // Move past the current match to find next occurrence
+        }
+    }
+
+    // Sort and merge overlapping ranges
+    let mut sorted_ranges = private_ranges.clone();
+    sorted_ranges.sort_by_key(|r| r.start);
+    
+    let mut merged_private = Vec::new();
+    if !sorted_ranges.is_empty() {
+        let mut current = sorted_ranges[0].clone();
+        
+        for range in sorted_ranges.iter().skip(1) {
+            if range.start <= current.end {
+                // Ranges overlap, merge them
+                current.end = current.end.max(range.end);
+            } else {
+                // No overlap, push current range and start new one
+                merged_private.push(current);
+                current = range.clone();
+            }
+        }
+        merged_private.push(current);
+    }
+
+    // Find public ranges (gaps between private ranges)
+    let mut public_ranges = Vec::new();
+    let mut last_end = 0;
+    
+    for r in &merged_private {
+        if r.start > last_end {
+            public_ranges.push(last_end..r.start);
+        }
+        last_end = r.end;
+    }
+    
+    if last_end < seq.len() {
+        public_ranges.push(last_end..seq.len());
+    }
+
+    (
+        RangeSet::from(public_ranges),
+        RangeSet::from(merged_private),
+    )
+}
+
+fn find_subsequence(haystack: &[u8], needle: &[u8]) -> Option<usize> {
+    haystack.windows(needle.len())
+        .position(|window| window == needle)
 }
