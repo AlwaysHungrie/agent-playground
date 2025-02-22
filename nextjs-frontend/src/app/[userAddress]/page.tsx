@@ -35,7 +35,7 @@ import { HiHome } from 'react-icons/hi'
 //   ],
 
 // Convert from object format back to JSON format
-export function convertLlmFunctionsToJson(
+function convertLlmFunctionsToJson(
   objectFunctions: LlmFunctionConfig[]
 ): JsonLlmFunction[] {
   return objectFunctions.map((objFunc) => {
