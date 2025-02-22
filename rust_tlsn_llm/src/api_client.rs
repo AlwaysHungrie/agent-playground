@@ -6,6 +6,30 @@ use std::collections::HashMap;
 
 use crate::config::Config;
 
+fn unescape_shell_string(s: &str) -> String {
+    let mut result = String::with_capacity(s.len());
+    let mut chars = s.chars().peekable();
+    
+    while let Some(c) = chars.next() {
+        if c == '\\' {
+            if let Some(&next) = chars.peek() {
+                // Skip the escape character and add the literal character
+                chars.next();
+                result.push(next);
+            }
+        } else {
+            result.push(c);
+        }
+    }
+    result
+}
+
+// Then in your code:
+// let unescaped = unescape_shell_string(&request_json);
+// let parsed_json: serde_json::Value = serde_json::from_str(&unescaped)?;
+// let request = builder.body(Full::new(Bytes::from(serde_json::to_string(&parsed_json)?)))?;
+
+
 pub struct ApiClient {
     url: String,
     headers: HashMap<String, String>,
@@ -37,7 +61,10 @@ impl ApiClient {
             builder = builder.header(key, value);
         }
 
-        let parsed_json: serde_json::Value = serde_json::from_str(&request_json)?;
+        let unescaped = unescape_shell_string(&request_json);
+        println!("Request JSON: {:?}", unescaped);
+        let parsed_json: serde_json::Value = serde_json::from_str(&unescaped)?;
+        println!("Parsed JSON: {:?}", parsed_json);
         let request = builder.body(Full::new(Bytes::from(serde_json::to_string(&parsed_json)?)))?;
         
         Ok(request)
