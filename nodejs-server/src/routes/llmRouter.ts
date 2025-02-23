@@ -210,6 +210,8 @@ llmRouter.post(
         `${OPENAI_API_KEY}`
       )
 
+      console.log('running command', command)
+
       const result = await executeRustCommand(command)
       res.json(result)
     } catch (err) {

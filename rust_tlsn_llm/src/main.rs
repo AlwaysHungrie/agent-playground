@@ -23,34 +23,12 @@ use tlsn_prover::{state::Closed, Prover};
 use tlsn_core::{presentation::Presentation, CryptoProvider};
 use tlsn_core::{request::RequestConfig, transcript::TranscriptCommitConfig};
 
-use base64::{decode, encode};
-
-fn base64_to_json(base64_str: &str) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-    // Decode base64 to bytes
-    let bytes = decode(base64_str)?;
-    
-    // Convert bytes to string
-    let json_str = String::from_utf8(bytes)?;
-    
-    // Parse JSON string to Value
-    let json_value = serde_json::from_str(&json_str)?;
-    
-    Ok(json_value)
-}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = Config::new();
     tracing_subscriber::fmt::init();
 
-    let request_json = &config.request_json;
-    println!("Request JSON: {:?}", request_json);
-    let parsed_json = base64_to_json(request_json)?;
-    println!("Parsed JSON: {:?}", parsed_json);
-
-    println!("initializing api client");
-    let api_client = ApiClient::new(&config);
-    
     debug!("Starting attested API calls...");
 
     // Setup notary service
@@ -70,6 +48,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     tokio::spawn(connection);
 
+    let api_client = ApiClient::new(&config);
+    
     // Send request and get response
     let request = api_client.build_request(&config.request_json)?;
     let response = request_sender.send_request(request).await?;

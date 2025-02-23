@@ -1,28 +1,25 @@
 // api_client.rs
 use hyper::{Request, Method, body::Bytes, Uri};
 use http_body_util::Full;
-use serde_json::Value;
 use std::collections::HashMap;
+use base64::{decode, encode};
 
 use crate::config::Config;
+use tracing::debug;
 
-fn unescape_shell_string(s: &str) -> String {
-    let mut result = String::with_capacity(s.len());
-    let mut chars = s.chars().peekable();
+fn base64_to_json(base64_str: &str) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+    // Decode base64 to bytes
+    let bytes = decode(base64_str)?;
     
-    while let Some(c) = chars.next() {
-        if c == '\\' {
-            if let Some(&next) = chars.peek() {
-                // Skip the escape character and add the literal character
-                chars.next();
-                result.push(next);
-            }
-        } else {
-            result.push(c);
-        }
-    }
-    result
+    // Convert bytes to string
+    let json_str = String::from_utf8(bytes)?;
+    
+    // Parse JSON string to Value
+    let json_value = serde_json::from_str(&json_str)?;
+    
+    Ok(json_value)
 }
+
 
 // Then in your code:
 // let unescaped = unescape_shell_string(&request_json);
@@ -61,10 +58,9 @@ impl ApiClient {
             builder = builder.header(key, value);
         }
 
-        let unescaped = unescape_shell_string(&request_json);
-        println!("Request JSON: {:?}", unescaped);
-        let parsed_json: serde_json::Value = serde_json::from_str(&unescaped)?;
-        println!("Parsed JSON: {:?}", parsed_json);
+        let parsed_json = base64_to_json(request_json)?;
+        debug!("Parsed JSON: {:?}", parsed_json);
+
         let request = builder.body(Full::new(Bytes::from(serde_json::to_string(&parsed_json)?)))?;
         
         Ok(request)
