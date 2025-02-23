@@ -56,64 +56,9 @@ const sanitizeJsonString = (jsonString: string): string => {
     return ''
   }
 
-  try {
-    // First, verify it's valid JSON
-    JSON.parse(jsonString)
-
-    // Replace characters that could cause shell interpretation issues
-    return (
-      jsonString
-        // Escape single quotes
-        .replace(/'/g, "'\\''")
-        // Escape double quotes that aren't already escaped
-        .replace(/(?<!\\)"/g, '\\"')
-        // Escape backticks
-        .replace(/`/g, '\\`')
-        // Escape dollar signs
-        .replace(/\$/g, '\\$')
-        // Escape parentheses
-        .replace(/\(/g, '\\(')
-        .replace(/\)/g, '\\)')
-        // Escape square brackets
-        .replace(/\[/g, '\\[')
-        .replace(/\]/g, '\\]')
-        // Escape curly braces
-        .replace(/\{/g, '\\{')
-        .replace(/\}/g, '\\}')
-        // Escape pipe
-        .replace(/\|/g, '\\|')
-        // Escape ampersand
-        .replace(/&/g, '\\&')
-        // Escape semicolon
-        .replace(/;/g, '\\;')
-        // Escape greater/less than
-        .replace(/</g, '\\<')
-        .replace(/>/g, '\\>')
-        // Escape newlines
-        .replace(/\n/g, '\\n')
-        // Escape tabs
-        .replace(/\t/g, '\\t')
-        // Escape asterisk
-        .replace(/\*/g, '\\*')
-        // Escape question mark
-        .replace(/\?/g, '\\?')
-        // Escape hash
-        .replace(/#/g, '\\#')
-        // Escape tilde
-        .replace(/~/g, '\\~')
-        // Escape caret
-        .replace(/\^/g, '\\^')
-        // Escape backslash that isn't already escaping something
-        .replace(/(?<!\\)\\/g, '\\\\')
-    )
-  } catch (error) {
-    console.error(`Error sanitizing JSON string: ${error}`)
-    throw new Error(
-      `Invalid JSON string: ${
-        error instanceof Error ? error.message : 'Unknown error'
-      }`
-    )
-  }
+  // base64 encode the json string
+  const base64Encoded = Buffer.from(jsonString).toString('base64')
+  return base64Encoded
 }
 
 const buildRustCommand = (

@@ -38,3 +38,5 @@ clap = { version = "4.5.29", features = ["derive", "env"] }
 
 aws-sdk-s3 = { version = "0.28" }
 aws-config = { version = "0.55" }
+
+base64 = "0.13"
