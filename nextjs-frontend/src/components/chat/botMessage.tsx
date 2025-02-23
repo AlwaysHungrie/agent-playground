@@ -37,7 +37,8 @@ const AttestationPopover = ({ type, attestationUrl }: AttestationProps) => {
       ? 'that does not reveal the system prompt but requires a trusted third party to verify it.'
       : 'that should only be shared with trusted parties as it contains the system prompt of the agent.'
 
-  const fileKey = attestationUrl.split('/').slice(3).join('/')
+  const fileKey = attestationUrl.split('/').slice(3).join('/') 
+  
   return (
     <Popover>
       <PopoverTrigger>
@@ -51,18 +52,9 @@ const AttestationPopover = ({ type, attestationUrl }: AttestationProps) => {
           <br />
           file key: <span className="break-all bg-yellow-100">{fileKey}</span>
           <br />
-          Click here to{' '}
+          Copy this file key and click here to
           <a
-            href={attestationUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-500 underline"
-          >
-            download
-          </a>{' '}
-          and here to{' '}
-          <a
-            href="https://verifier-playground.constella.one/"
+            href="https://constella.one/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-500 underline"
